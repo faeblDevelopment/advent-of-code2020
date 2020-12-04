@@ -1,8 +1,10 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE BangPatterns     #-}
+
 import System.IO.Unsafe
 import Control.Exception
 import Data.Maybe
+import Lib
 
 dummyData = [ "1-3 a: abcde"
             , "1-3 b: cdefg"
@@ -55,16 +57,3 @@ parsePassword passFunc str = let (strSpec:strPass:_) = str `splitOn` ": "
                                  spec = toSpec strSpec
                              in (passFunc strPass) =<< spec 
 
-splitOn :: (Eq a) => [a] -> [a] -> [[a]]
-splitOn str []   = [str]
-splitOn str stop = reverse $ go str stop id
-    where 
-        go :: Eq a => [a] -> [a] -> ([[a]] -> [[a]]) -> [[a]]
-        go []  _    f = f []
-        go str stop f = let (evtl, rest) = break (== (head stop)) str
-                      in if take (length stop) rest == stop 
-                            then go (drop (length stop) rest) stop $ (([]:) . (addToHead evtl) . f)
-                            else go (drop 1 rest) stop $ (addToHead (evtl) . f) 
-            where addToHead :: [a] -> [[a]] -> [[a]]
-                  addToHead a []     = [a]
-                  addToHead a (as:r) = (a ++ as):r
