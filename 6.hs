@@ -40,42 +40,47 @@ addToSet (S l) as = S $ l ++ (catMaybes $ foldr (\x acc -> if (x `elem` l)
 fromSet :: Set a -> [a]
 fromSet (S a) = a
 
+--| essentially `nub`; also \(\mathcal{O}(n^2)\), 
+-- but nice because implemented using set functions =P
 distinct :: (Eq a) => [a] -> [a]
 distinct = fromSet . toSet
 
+{-
 getAnswerCount :: [String] -> Int
-getAnswerCount answers = length $ fromSet $ toSet $ foldr (++) "" answers  
+getAnswerCount = length . distinct . foldr1 (++)  
+-}
 
 allContain :: Eq a => [[a]] -> a -> Bool
 allContain lists a = and $ map (a `elem`) lists
 
 main = do
-        let parseInputs = filter (/= "") . map (filter (/= '\n')) . (`splitOn` "\n\n") 
-            dummyDistinct = map distinct $ parseInputs dummyInput
-            dummyCounts = map length dummyDistinct
+        let allOfGroups = filter (/= "") . map (filter (/= '\n')) . (`splitOn` "\n\n") 
+            distinctForGroups = map distinct . allOfGroups
+            distinctLengths = map length
+            dummyDistinct = distinctForGroups dummyInput
         
         -- dummy --
         putStrLn $ "ansers counts in dummyInput: " ++
-            (show $ dummyCounts)
+            (show $ distinctLengths $ dummyDistinct)
         putStrLn $ "ansers sum in dummyInput: " ++
-            (show $ sum dummyCounts)
+            (show $ sum $ distinctLengths $ dummyDistinct)
         
         -- input -- 
         contents <- readFile "6.input"
-        let distincts = map distinct $ parseInputs contents
-            counts = map length distincts
+        let distincts = distinctForGroups contents
 
         putStrLn $ "ansers sum in Input: " ++
-            (show $ sum counts)
+            (show $ sum $ distinctLengths $ distincts)
         
         ------------------ 2 ----------------------------------------
 
         let parseInputs' = map (filter (/= "")) . map (`splitOn` "\n") . (`splitOn` "\n\n")
-            getAnswers dist inp = map (length . filter (==True)) 
-                            $ map (\(d,i) -> map (i `allContain`) d) 
-                            $ zip dist $ parseInputs' inp
-            dummyAnswers = getAnswers dummyDistinct dummyInput
-            answers = getAnswers distincts contents
+            getAnswers inp = map (length . filter (==True)) 
+                                $ map (\(d,i) -> map (i `allContain`) d) 
+                                $ zip (distinctForGroups inp) $ parseInputs' inp
+
+            dummyAnswers        = getAnswers dummyInput
+            answers             = getAnswers contents
 
         -- dummy --
         putStrLn $ "allContains in dummyInput: " ++
@@ -84,7 +89,7 @@ main = do
             (show $ sum dummyAnswers)
 
         -- input --
-        putStrLn $ "allContains in input: " ++
-            (show $ answers)
+        --putStrLn $ "allContains in input: " ++
+        --    (show $ answers)
         putStrLn $ "sum allContains in input: " ++
             (show $ sum answers)
