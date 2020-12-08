@@ -20,30 +20,6 @@ dummyInput = unlines $ ["abc"
                        ,""
                        ,"b"]
 
-data Set a where
-    S :: (Eq a) => [a] -> Set a
-
-instance Show a => Show (Set a) where
-    show (S a) = "Set " ++ show a
-
-toSet :: (Eq a) => [a] -> Set a
-toSet = addToSet (S [])
-
-addToSet :: Eq a => Set a -> [a] -> Set a
-addToSet s [] = s
-addToSet (S l) as = S $ l ++ (catMaybes $ foldr (\x acc -> if (x `elem` l) 
-                                                                 || ((Just x) `elem` acc)
-                                                      then Nothing:acc
-                                                      else (Just x):acc)
-                                                    []
-                                                    as)
-fromSet :: Set a -> [a]
-fromSet (S a) = a
-
---| essentially `nub`; also \(\mathcal{O}(n^2)\), 
--- but nice because implemented using set functions =P
-distinct :: (Eq a) => [a] -> [a]
-distinct = fromSet . toSet
 
 {-
 getAnswerCount :: [String] -> Int
