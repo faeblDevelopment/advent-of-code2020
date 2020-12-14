@@ -19,9 +19,18 @@ dummyInput = ["light red bags contain 1 bright white bag, 2 muted yellow bags."
              ,"faded blue bags contain no other bags."
              ,"dotted black bags contain no other bags."]
 
--- not working yet; not sure why
+dummy2 = [ "shiny gold bags contain 2 dark red bags."
+         , "dark red bags contain 2 dark orange bags."
+         , "dark orange bags contain 2 dark yellow bags."
+         , "dark yellow bags contain 2 dark green bags."
+         , "dark green bags contain 2 dark blue bags."
+         , "dark blue bags contain 2 dark violet bags."
+         , "dark violet bags contain no other bags." ]
+
+
 main = do
     let color = "shiny gold"
+        rule = getFirst (\(Rule x _) -> x == color)
     putStrLn $ "possible bags to contain a shiny gold bag in the input:\n" ++
         (show $ map bag $ getAllBagRules color $ map (fromJust . parseRule) dummyInput)
     
@@ -33,6 +42,18 @@ main = do
     --putStrLn $ "possible bag colors: " ++ (show $ colors)
     putStrLn $ "possible bag colors: " ++ (show $ length colors)
 
+    ---
+    let toRules = map (fromJust . parseRule)
+        dummyRules = toRules dummyInput 
+        dummy2Rules = toRules dummy2
+        inputRules = map fromJust rules
+    putStrLn $ "numberOfBags in dummy inpuy: " ++
+        (show $ getContainedBags (rule $ dummyRules) dummyRules)
+    putStrLn $ "numberOfBags in dummy 2: " ++
+        (show $ getContainedBags (rule $ dummy2Rules) dummy2Rules)
+    putStrLn $ "numberOfBags in input: " ++
+        (show $ getContainedBags (rule $ inputRules) inputRules) 
+    
 type Bag = String
 
 data Rule = Rule { bag :: !Bag
@@ -68,26 +89,6 @@ parseRule s = let
 trace' :: Show a => a -> a
 trace' !a = trace (show a) a
 
-    {-
-test rules = fix (\b -> sort
-                $ distinct
-                $ intercalate []
-                $ map (`searchForBagRules` rules) b)
-                -}
-    {-
-
-searchAllBags :: Bag -> [Rule] -> [Bag]
-searchAllBags bag rules = fix (\rec bs ->
-                    let x = sort
-                            $ distinct 
-                            $ (++bs) 
-                            $ intercalate []
-                            $ map (\x -> searchForBagDirect x rules)
-                            $ filter (/=bag) bs
-                     in if bs == x then bs else rec x) (searchForBagDirect bag rules) 
-                            --(searchForBagDirect bag rules)
--}
-
 
 getAllBagRules :: Bag -> [Rule] -> [Rule]
 getAllBagRules b r = fix 
@@ -97,8 +98,28 @@ getAllBagRules b r = fix
                                 $ map (\(Rule x _) -> searchForBagRules x r) n
                          in if n == comb then comb else rec comb) $ searchForBagRules b r
 
+getFirst :: (a -> Bool) -> [a] -> a
+getFirst f = head . filter f
+
+getContainedBags :: Rule -> [Rule] -> Int
+getContainedBags b r = fix
+                    (\rec (Rule n bs) ->
+                        let res = sum
+                                $ map (\(b', n) -> 
+                                    n * (1+ rec (getFirst (\(Rule x _) -> x == b') r))) bs
+                         in res) 
+                         $ b
+
+searchForBags :: Bag -> [Rule] -> [(Bag, Int)]
+searchForBags b bs = firstInstances
+    where   
+        getBagsFor x bs = filter (\(Rule b' _) -> x == b') bs
+        firstInstances = intercalate [] $ map spec $ getBagsFor b bs
+
 searchForBagRules :: Bag -> [Rule] -> [Rule]
 searchForBagRules b bs = firstInstances
     where
         getRulesFor x bs = filter (\(Rule _ bs') -> elem x $ map fst bs') $ filter ((/=x) . bag)  bs
         firstInstances = getRulesFor b bs 
+
+
