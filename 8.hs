@@ -34,16 +34,16 @@ main = do
     --print $ runState (fixState eval band) $ EvalState 0 0
 
     putStrLn "fixing bug:"
-    let res = untilLastExecuted band 0
+    let res = untilLastExecuted band (-1)
     print res
     print $ (!!627) . fst $ res
 
 untilLastExecuted :: Band (ArithFunc Int) -> Int -> (Band (ArithFunc Int), EvalState)
 untilLastExecuted band i =
-    let result = runState (fixState eval band) $ EvalState 0 0
+    let result = runState (fixState eval (changeIth i band)) $ EvalState 0 0
     in if (snd . last . fst $ result) 
          then result
-         else untilLastExecuted (changeIth i band) (i+1)
+         else untilLastExecuted band (i+1)
 
 changeIth :: Int -> Band (ArithFunc Int) -> Band (ArithFunc Int)
 changeIth _ [] = []
