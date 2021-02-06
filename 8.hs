@@ -101,7 +101,9 @@ instance Functor (State s) where
 
 instance Applicative (State s) where
     pure a = State $ \s -> (a, s)
-    (State s1) <*> s2 = State $ \s -> (fst . ($s) . runState $ (fst . s1) s `fmap` s2, s) 
+    (State act) <*> s2 = State $ \s -> 
+        let (f, s') = act s
+         in runState (f <$> s2) s'
 
 instance Monad (State s) where
     (State act) >>= f = State $ \s -> 
