@@ -104,10 +104,8 @@ getFirst f = head . filter f
 getContainedBags :: Rule -> [Rule] -> Int
 getContainedBags b r = fix
                     (\rec (Rule n bs) ->
-                        let res = sum
-                                $ map (\(b', n) -> 
-                                    n * (1+ rec (getFirst (\(Rule x _) -> x == b') r))) bs
-                         in res) 
+                        sum $ map (\(b', n) -> 
+                                    n * (1+ rec (getFirst (\(Rule x _) -> x == b') r))) bs) 
                          $ b
 
 searchForBags :: Bag -> [Rule] -> [(Bag, Int)]
