@@ -67,3 +67,8 @@ fromSet (S a) = a
 --   but nice because implemented using set functions =P
 distinct :: (Eq a) => [a] -> [a]
 distinct = fromSet . toSet
+
+
+safeHead :: [a] -> Maybe a 
+safeHead (h:_) = Just h
+safeHead _     = Nothing
