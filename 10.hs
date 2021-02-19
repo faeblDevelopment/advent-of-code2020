@@ -49,15 +49,17 @@ dummyAdapters2 = [ 28
                  , 10
                  , 3 ]
 
+counts l = map (\x -> (x, length $ filter (==x) l)) [0..3]
+
+calcResult l = snd . head $ scanr (\a (b,l) -> (a ,(b-a):l)) (maximum l + 3,[]) $ sort $ 0:l
+
 main = do
-   
-    let counts l = map (\x -> (x, length $ filter (==x) l)) [0..3]
-        calcResult l = snd . head $ scanr (\a (b,l) -> (a ,(b-a):l)) (maximum dummyAdapters + 3,[]) $ sort $ 0:l
-        dummyResult = calcResult dummyAdapters
+    let dummyResult = calcResult dummyAdapters
+
     print $ counts dummyResult
     print $ counts $ calcResult dummyAdapters2
 
     contents <- readFile "10.input"
     let adapters = map (read @Int) $ lines contents
-    print $ counts $ calcResult adapters -- have to add +1 to the count for three, not yet sure why
+    print $ counts $ calcResult adapters 
 
